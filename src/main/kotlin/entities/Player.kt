@@ -6,47 +6,66 @@ import java.awt.Graphics
 import java.awt.image.BufferedImage
 
 class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, initialY) {
-    enum class Animations {
-        IDLE,
-        RUNNING,
-        JUMPING,
-        FALLING,
-        GROUND,
-        HIT,
-        ATTACK_1,
-        ATTACK_JUMP_1,
-        ATTACK_JUMP_2
+    enum class Animations(val spriteCount: Int) {
+        IDLE(5),
+        RUNNING(6),
+        JUMPING(3),
+        FALLING(1),
+        GROUND(2),
+        HIT(4),
+        ATTACK_1(3),
+        ATTACK_JUMP_1(3),
+        ATTACK_JUMP_2(3)
     }
 
-    private val playerSprite = loadImage("player_sprites.png").getOrElse {
+    companion object {
+        private const val SPRITE_WIDTH = 64
+        private const val SPRITE_HEIGHT = 40
+        private const val RENDER_WIDTH = 128
+        private const val RENDER_HEIGHT = 80
+        private const val ANIMATION_SPEED = 25
+        private const val MOVEMENT_SPEED = 5f
+        private const val SPRITE_COLS = 6
+        private const val SPRITE_ROWS = 9
+    }
+
+    private val playerSprite: BufferedImage = loadImage("player_sprites.png").getOrElse {
         error("Failed to load player sprite: ${it.message}")
     }
 
-    private val animations: Array<Array<BufferedImage>> = Array(9) { row ->
-        Array(6) { col ->
-            playerSprite.getSubimage(col * 64, row * 40, 64, 40)
-        }
-    }
+    private val animations: Array<Array<BufferedImage>> = loadAnimations()
 
     private var animationTick = 0
     private var animationIndex = 0
-    private val animationSpeed = 25
     private var currentAction = Animations.IDLE
     private var direction: Direction? = null
     private var isMoving = false
-
-    private val movementSpeed = 5
+    private var isAttacking = false
 
     fun setDirection(newDirection: Direction) {
-        direction = newDirection
-        isMoving = true
+        if (!isAttacking) { // Prevent movement during attack
+            direction = newDirection
+            isMoving = true
+        }
     }
 
     fun setMoving(moving: Boolean) {
-        isMoving = moving
-        if (!moving) {
-            currentAction = Animations.IDLE
-            animationIndex = 0
+        if (!isAttacking) { // Prevent stopping movement during attack
+            isMoving = moving
+            if (!moving) {
+                resetAnimation(Animations.IDLE)
+            }
+        }
+    }
+
+    fun setAttacking(attacking: Boolean) {
+        isAttacking = attacking
+        if (attacking) {
+            resetAnimation(Animations.ATTACK_1)
+        } else {
+            // Return to appropriate state after attack
+            currentAction = if (isMoving) Animations.RUNNING else Animations.IDLE
+            resetAnimationCounters()
         }
     }
 
@@ -57,56 +76,96 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
     }
 
     override fun render(graphics: Graphics) {
+        val currentFrame = getCurrentFrame()
         graphics.drawImage(
-            animations[currentAction.ordinal][animationIndex],
+            currentFrame,
             xPosition.toInt(),
             yPosition.toInt(),
-            128,
-            80,
+            RENDER_WIDTH,
+            RENDER_HEIGHT,
             null
         )
     }
 
-    private fun updateAnimationTick() {
-        animationTick++
-        if (animationTick >= animationSpeed) {
-            animationTick = 0
-            animationIndex++
-            if (animationIndex >= getSpriteAmount(currentAction)) {
-                animationIndex = 0
+    private fun loadAnimations(): Array<Array<BufferedImage>> {
+        return Array(SPRITE_ROWS) { row ->
+            Array(SPRITE_COLS) { col ->
+                playerSprite.getSubimage(
+                    col * SPRITE_WIDTH,
+                    row * SPRITE_HEIGHT,
+                    SPRITE_WIDTH,
+                    SPRITE_HEIGHT
+                )
             }
         }
     }
 
+    private fun getCurrentFrame(): BufferedImage {
+        return animations[currentAction.ordinal][animationIndex]
+    }
+
+    private fun updateAnimationTick() {
+        animationTick++
+        if (animationTick >= ANIMATION_SPEED) {
+            animationTick = 0
+            animationIndex++
+            if (animationIndex >= currentAction.spriteCount) {
+                animationIndex = 0
+                handleAnimationLoop()
+            }
+        }
+    }
+
+    private fun handleAnimationLoop() {
+        // Handle one-time animations
+        when (currentAction) {
+            Animations.ATTACK_1 -> {
+                isAttacking = false
+                currentAction = if (isMoving) Animations.RUNNING else Animations.IDLE
+            }
+            // Add other one-time animations here
+            else -> { /* Looping animations don't need special handling */ }
+        }
+    }
+
     private fun updateAnimation() {
-        currentAction = if (isMoving) {
-            Animations.RUNNING
-        } else {
-            Animations.IDLE
+        if (isAttacking) return // Don't change animation during attack
+
+        val newAction = determineAnimation()
+        if (newAction != currentAction) {
+            currentAction = newAction
+            resetAnimationCounters()
+        }
+    }
+
+    private fun determineAnimation(): Animations {
+        return when {
+            isAttacking -> Animations.ATTACK_1
+            isMoving -> Animations.RUNNING
+            else -> Animations.IDLE
         }
     }
 
     private fun updatePosition() {
-        if (!isMoving) return
+        if (!isMoving || isAttacking) return
 
-        when (direction) {
-            Direction.LEFT -> xPosition -= movementSpeed
-            Direction.RIGHT -> xPosition += movementSpeed
-            Direction.UP -> yPosition -= movementSpeed
-            Direction.DOWN -> yPosition += movementSpeed
-            null -> {}
+        direction?.let { dir ->
+            when (dir) {
+                Direction.LEFT -> xPosition -= MOVEMENT_SPEED
+                Direction.RIGHT -> xPosition += MOVEMENT_SPEED
+                Direction.UP -> yPosition -= MOVEMENT_SPEED
+                Direction.DOWN -> yPosition += MOVEMENT_SPEED
+            }
         }
     }
 
-    private fun getSpriteAmount(playerAction: Animations): Int = when (playerAction) {
-        Animations.IDLE -> 5
-        Animations.RUNNING -> 6
-        Animations.HIT -> 4
-        Animations.JUMPING,
-        Animations.ATTACK_1,
-        Animations.ATTACK_JUMP_1,
-        Animations.ATTACK_JUMP_2 -> 3
-        Animations.GROUND -> 2
-        Animations.FALLING -> 1
+    private fun resetAnimation(newAction: Animations) {
+        currentAction = newAction
+        resetAnimationCounters()
+    }
+
+    private fun resetAnimationCounters() {
+        animationIndex = 0
+        animationTick = 0
     }
 }

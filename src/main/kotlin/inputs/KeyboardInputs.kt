@@ -15,11 +15,16 @@ class KeyboardInputs(private val gamePanel: GamePanel) : KeyListener {
             KeyEvent.VK_A, KeyEvent.VK_LEFT -> gamePanel.player.setDirection(Direction.LEFT)
             KeyEvent.VK_S, KeyEvent.VK_DOWN -> gamePanel.player.setDirection(Direction.DOWN)
             KeyEvent.VK_D, KeyEvent.VK_RIGHT -> gamePanel.player.setDirection(Direction.RIGHT)
+            KeyEvent.VK_SPACE -> gamePanel.player.setAttacking(true)
             KeyEvent.VK_ESCAPE -> exitProcess(0)
         }
     }
 
     override fun keyReleased(e: KeyEvent?) {
-        gamePanel.player.setMoving(false)
+        if (e?.keyCode == KeyEvent.VK_SPACE)
+            gamePanel.player.setAttacking(false)
+        else
+            gamePanel.player.setMoving(false)
+
     }
 }
