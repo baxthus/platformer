@@ -33,7 +33,16 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
         error("Failed to load player sprite: ${it.message}")
     }
 
-    private val animations: Array<Array<BufferedImage>> = loadAnimations()
+    private val animations: Array<Array<BufferedImage>> = Array(SPRITE_ROWS) { row ->
+        Array(SPRITE_COLS) { col ->
+            playerSprite.getSubimage(
+                col * SPRITE_WIDTH,
+                row * SPRITE_HEIGHT,
+                SPRITE_WIDTH,
+                SPRITE_HEIGHT
+            )
+        }
+    }
 
     private var animationTick = 0
     private var animationIndex = 0
@@ -87,22 +96,7 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
         )
     }
 
-    private fun loadAnimations(): Array<Array<BufferedImage>> {
-        return Array(SPRITE_ROWS) { row ->
-            Array(SPRITE_COLS) { col ->
-                playerSprite.getSubimage(
-                    col * SPRITE_WIDTH,
-                    row * SPRITE_HEIGHT,
-                    SPRITE_WIDTH,
-                    SPRITE_HEIGHT
-                )
-            }
-        }
-    }
-
-    private fun getCurrentFrame(): BufferedImage {
-        return animations[currentAction.ordinal][animationIndex]
-    }
+    private fun getCurrentFrame(): BufferedImage = animations[currentAction.ordinal][animationIndex]
 
     private fun updateAnimationTick() {
         animationTick++
@@ -124,7 +118,8 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
                 currentAction = if (isMoving) Animations.RUNNING else Animations.IDLE
             }
             // Add other one-time animations here
-            else -> { /* Looping animations don't need special handling */ }
+            else -> { /* Looping animations don't need special handling */
+            }
         }
     }
 
