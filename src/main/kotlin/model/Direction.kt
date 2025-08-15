@@ -4,5 +4,9 @@ enum class Direction {
     LEFT,
     UP,
     RIGHT,
-    DOWN
+    DOWN,
+    UP_LEFT,
+    UP_RIGHT,
+    DOWN_LEFT,
+    DOWN_RIGHT
 }

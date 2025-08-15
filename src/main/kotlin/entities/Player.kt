@@ -48,13 +48,31 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
     private var animationTick = 0
     private var animationIndex = 0
     private var currentAction = Animations.IDLE
-    private var direction: Direction? = null
+    private val activeDirections = mutableSetOf<Direction>()
     private var isMoving = false
     private var isAttacking = false
 
+    fun addDirection(direction: Direction) {
+        if (!isAttacking) {
+            activeDirections.add(direction)
+            isMoving = activeDirections.isNotEmpty()
+        }
+    }
+
+    fun removeDirection(direction: Direction) {
+        if (!isAttacking) {
+            activeDirections.remove(direction)
+            isMoving = activeDirections.isNotEmpty()
+            if (!isMoving) {
+                resetAnimation(Animations.IDLE)
+            }
+        }
+    }
+
     fun setDirection(newDirection: Direction) {
-        if (!isAttacking) { // Prevent movement during attack
-            direction = newDirection
+        if (!isAttacking) {
+            activeDirections.clear()
+            activeDirections.add(newDirection)
             isMoving = true
         }
     }
@@ -81,7 +99,7 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
 
     fun resetMoving() {
         isMoving = false
-        direction = null
+        activeDirections.clear()
         resetAnimation(Animations.IDLE)
     }
 
@@ -149,16 +167,47 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
     }
 
     private fun updatePosition() {
-        if (!isMoving || isAttacking) return
+        if (!isMoving || isAttacking || activeDirections.isEmpty()) return
 
-        direction?.let { dir ->
-            when (dir) {
-                Direction.LEFT -> xPosition -= MOVEMENT_SPEED
-                Direction.RIGHT -> xPosition += MOVEMENT_SPEED
-                Direction.UP -> yPosition -= MOVEMENT_SPEED
-                Direction.DOWN -> yPosition += MOVEMENT_SPEED
+        var deltaX = 0f
+        var deltaY = 0f
+
+        // Calculate movement vector from active directions
+        for (direction in activeDirections) {
+            when (direction) {
+                Direction.LEFT -> deltaX -= 1f
+                Direction.RIGHT -> deltaX += 1f
+                Direction.UP -> deltaY -= 1f
+                Direction.DOWN -> deltaY += 1f
+                Direction.UP_LEFT -> {
+                    deltaX -= 1f
+                    deltaY -= 1f
+                }
+                Direction.UP_RIGHT -> {
+                    deltaX += 1f
+                    deltaY -= 1f
+                }
+                Direction.DOWN_LEFT -> {
+                    deltaX -= 1f
+                    deltaY += 1f
+                }
+                Direction.DOWN_RIGHT -> {
+                    deltaX += 1f
+                    deltaY += 1f
+                }
             }
         }
+
+        // Normalize diagonal movement to maintain consistent speed
+        if (deltaX != 0f && deltaY != 0f) {
+            val normalizer = 0.7071f // 1/sqrt(2) to normalize diagonal movement
+            deltaX *= normalizer
+            deltaY *= normalizer
+        }
+
+        // Apply movement
+        xPosition += deltaX * MOVEMENT_SPEED
+        yPosition += deltaY * MOVEMENT_SPEED
     }
 
     private fun resetAnimation(newAction: Animations) {
