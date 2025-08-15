@@ -3,8 +3,15 @@ package `fun`.baxt
 class Game : Runnable {
     object Properties {
         const val TITLE = "Platformer"
-        const val WIDTH = 1280
-        const val HEIGHT = 800
+
+        const val TILES_DEFAULT_SIZE = 32
+        const val SCALE = 2f
+        const val TILES_IN_WIDTH = 26
+        const val TILES_IN_HEIGHT = 14
+        const val TILES_SIZE = (TILES_DEFAULT_SIZE * SCALE).toInt()
+
+        const val WIDTH = TILES_IN_WIDTH * TILES_SIZE
+        const val HEIGHT = TILES_IN_HEIGHT * TILES_SIZE
         const val FPS_TARGET = 144
         const val UPS_TARGET = 200
         const val TIME_PER_TICK = 1_000_000_000L / FPS_TARGET

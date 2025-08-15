@@ -1,5 +1,6 @@
 package `fun`.baxt.entities
 
+import `fun`.baxt.Game
 import `fun`.baxt.model.Direction
 import `fun`.baxt.utils.loadImage
 import java.awt.Graphics
@@ -21,8 +22,8 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
     companion object {
         private const val SPRITE_WIDTH = 64
         private const val SPRITE_HEIGHT = 40
-        private const val RENDER_WIDTH = 128
-        private const val RENDER_HEIGHT = 80
+        private const val RENDER_WIDTH = (SPRITE_WIDTH * Game.Properties.SCALE).toInt()
+        private const val RENDER_HEIGHT = (SPRITE_HEIGHT * Game.Properties.SCALE).toInt()
         private const val ANIMATION_SPEED = 25
         private const val MOVEMENT_SPEED = 5f
         private const val SPRITE_COLS = 6
@@ -76,6 +77,12 @@ class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, 
             currentAction = if (isMoving) Animations.RUNNING else Animations.IDLE
             resetAnimationCounters()
         }
+    }
+
+    fun resetMoving() {
+        isMoving = false
+        direction = null
+        resetAnimation(Animations.IDLE)
     }
 
     override fun update() {

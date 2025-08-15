@@ -1,5 +1,7 @@
 package `fun`.baxt
 
+import java.awt.event.WindowEvent
+import java.awt.event.WindowFocusListener
 import javax.swing.JFrame
 
 class GameWindow(gamePanel: GamePanel) : JFrame() {
@@ -13,5 +15,12 @@ class GameWindow(gamePanel: GamePanel) : JFrame() {
         isResizable = false
         pack()
         // isVisible = true
+        addWindowFocusListener(object : WindowFocusListener {
+            override fun windowGainedFocus(e: WindowEvent?) {}
+
+            override fun windowLostFocus(e: WindowEvent?) {
+                gamePanel.player.resetMoving()
+            }
+        })
     }
 }
