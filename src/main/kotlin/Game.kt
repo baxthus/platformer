@@ -1,8 +1,16 @@
 package `fun`.baxt
 
-import `fun`.baxt.config.GameProperties
-
 class Game : Runnable {
+    object Properties {
+        const val TITLE = "Platformer"
+        const val WIDTH = 1280
+        const val HEIGHT = 800
+        const val FPS_TARGET = 144
+        const val UPS_TARGET = 200
+        const val TIME_PER_TICK = 1_000_000_000L / FPS_TARGET
+        const val TIME_PER_UPDATE = 1_000_000_000L / UPS_TARGET
+    }
+
     private val gamePanel = GamePanel()
     private val gameWindow = GameWindow(gamePanel)
     private var running = false
@@ -38,8 +46,8 @@ class Game : Runnable {
             val deltaTime = currentTime - previousTime
             previousTime = currentTime
 
-            deltaU += deltaTime.toDouble() / GameProperties.TIME_PER_UPDATE
-            deltaF += deltaTime.toDouble() / GameProperties.TIME_PER_TICK
+            deltaU += deltaTime.toDouble() / Properties.TIME_PER_UPDATE
+            deltaF += deltaTime.toDouble() / Properties.TIME_PER_TICK
 
             if (deltaU >= 1.0) {
                 update()

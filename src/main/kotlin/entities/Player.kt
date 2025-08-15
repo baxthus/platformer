@@ -1,12 +1,23 @@
 package `fun`.baxt.entities
 
-import `fun`.baxt.config.Direction
-import `fun`.baxt.config.PlayerProperties
+import `fun`.baxt.model.Direction
 import `fun`.baxt.utils.loadImage
 import java.awt.Graphics
 import java.awt.image.BufferedImage
 
-class Player(initialX: Int = 100, initialY: Int = 100) {
+class Player(initialX: Float = 100f, initialY: Float = 100f) : Entity(initialX, initialY) {
+    enum class Animations {
+        IDLE,
+        RUNNING,
+        JUMPING,
+        FALLING,
+        GROUND,
+        HIT,
+        ATTACK_1,
+        ATTACK_JUMP_1,
+        ATTACK_JUMP_2
+    }
+
     private val playerSprite = loadImage("player_sprites.png").getOrElse {
         error("Failed to load player sprite: ${it.message}")
     }
@@ -17,15 +28,10 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
         }
     }
 
-    var xPosition = initialX
-        private set
-    var yPosition = initialY
-        private set
-
     private var animationTick = 0
     private var animationIndex = 0
     private val animationSpeed = 25
-    private var currentAction = PlayerProperties.Animations.IDLE
+    private var currentAction = Animations.IDLE
     private var direction: Direction? = null
     private var isMoving = false
 
@@ -39,22 +45,22 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
     fun setMoving(moving: Boolean) {
         isMoving = moving
         if (!moving) {
-            currentAction = PlayerProperties.Animations.IDLE
+            currentAction = Animations.IDLE
             animationIndex = 0
         }
     }
 
-    fun update() {
+    override fun update() {
         updateAnimationTick()
         updateAnimation()
         updatePosition()
     }
 
-    fun render(graphics: Graphics) {
+    override fun render(graphics: Graphics) {
         graphics.drawImage(
             animations[currentAction.ordinal][animationIndex],
-            xPosition,
-            yPosition,
+            xPosition.toInt(),
+            yPosition.toInt(),
             128,
             80,
             null
@@ -66,7 +72,7 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
         if (animationTick >= animationSpeed) {
             animationTick = 0
             animationIndex++
-            if (animationIndex >= PlayerProperties.getSpriteAmount(currentAction)) {
+            if (animationIndex >= getSpriteAmount(currentAction)) {
                 animationIndex = 0
             }
         }
@@ -74,9 +80,9 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
 
     private fun updateAnimation() {
         currentAction = if (isMoving) {
-            PlayerProperties.Animations.RUNNING
+            Animations.RUNNING
         } else {
-            PlayerProperties.Animations.IDLE
+            Animations.IDLE
         }
     }
 
@@ -90,5 +96,17 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
             Direction.DOWN -> yPosition += movementSpeed
             null -> {}
         }
+    }
+
+    private fun getSpriteAmount(playerAction: Animations): Int = when (playerAction) {
+        Animations.IDLE -> 5
+        Animations.RUNNING -> 6
+        Animations.HIT -> 4
+        Animations.JUMPING,
+        Animations.ATTACK_1,
+        Animations.ATTACK_JUMP_1,
+        Animations.ATTACK_JUMP_2 -> 3
+        Animations.GROUND -> 2
+        Animations.FALLING -> 1
     }
 }

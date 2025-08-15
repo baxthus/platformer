@@ -1,7 +1,7 @@
 package `fun`.baxt.inputs
 
 import `fun`.baxt.GamePanel
-import `fun`.baxt.config.Direction
+import `fun`.baxt.model.Direction
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import kotlin.system.exitProcess
@@ -11,15 +11,15 @@ class KeyboardInputs(private val gamePanel: GamePanel) : KeyListener {
 
     override fun keyPressed(e: KeyEvent?) {
         when (e?.keyCode) {
-            KeyEvent.VK_W, KeyEvent.VK_UP -> gamePanel.setDirection(Direction.UP)
-            KeyEvent.VK_A, KeyEvent.VK_LEFT -> gamePanel.setDirection(Direction.LEFT)
-            KeyEvent.VK_S, KeyEvent.VK_DOWN -> gamePanel.setDirection(Direction.DOWN)
-            KeyEvent.VK_D, KeyEvent.VK_RIGHT -> gamePanel.setDirection(Direction.RIGHT)
+            KeyEvent.VK_W, KeyEvent.VK_UP -> gamePanel.player.setDirection(Direction.UP)
+            KeyEvent.VK_A, KeyEvent.VK_LEFT -> gamePanel.player.setDirection(Direction.LEFT)
+            KeyEvent.VK_S, KeyEvent.VK_DOWN -> gamePanel.player.setDirection(Direction.DOWN)
+            KeyEvent.VK_D, KeyEvent.VK_RIGHT -> gamePanel.player.setDirection(Direction.RIGHT)
             KeyEvent.VK_ESCAPE -> exitProcess(0)
         }
     }
 
     override fun keyReleased(e: KeyEvent?) {
-        gamePanel.setMoving(false)
+        gamePanel.player.setMoving(false)
     }
 }
