@@ -1,5 +1,7 @@
 package `fun`.baxt
 
+import `fun`.baxt.config.Direction
+import `fun`.baxt.config.GameProperties
 import `fun`.baxt.entities.Player
 import `fun`.baxt.inputs.KeyboardInputs
 import `fun`.baxt.inputs.MouseInputs
@@ -17,7 +19,7 @@ class GamePanel : JPanel() {
     }
 
     private fun setupPanel() {
-        Dimension(Properties.WIDTH, Properties.HEIGHT).let {
+        Dimension(GameProperties.WIDTH, GameProperties.HEIGHT).let {
             minimumSize = it
             preferredSize = it
             maximumSize = it
@@ -33,7 +35,7 @@ class GamePanel : JPanel() {
         }
     }
 
-    fun setDirection(direction: Properties.Directions) {
+    fun setDirection(direction: Direction) {
         player.setDirection(direction)
     }
 

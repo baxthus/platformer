@@ -1,6 +1,7 @@
 package `fun`.baxt.entities
 
-import `fun`.baxt.Properties
+import `fun`.baxt.config.Direction
+import `fun`.baxt.config.PlayerProperties
 import `fun`.baxt.utils.loadImage
 import java.awt.Graphics
 import java.awt.image.BufferedImage
@@ -24,13 +25,13 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
     private var animationTick = 0
     private var animationIndex = 0
     private val animationSpeed = 25
-    private var currentAction = Properties.Player.Animations.IDLE
-    private var direction: Properties.Directions? = null
+    private var currentAction = PlayerProperties.Animations.IDLE
+    private var direction: Direction? = null
     private var isMoving = false
 
     private val movementSpeed = 5
 
-    fun setDirection(newDirection: Properties.Directions) {
+    fun setDirection(newDirection: Direction) {
         direction = newDirection
         isMoving = true
     }
@@ -38,7 +39,7 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
     fun setMoving(moving: Boolean) {
         isMoving = moving
         if (!moving) {
-            currentAction = Properties.Player.Animations.IDLE
+            currentAction = PlayerProperties.Animations.IDLE
             animationIndex = 0
         }
     }
@@ -65,7 +66,7 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
         if (animationTick >= animationSpeed) {
             animationTick = 0
             animationIndex++
-            if (animationIndex >= Properties.Player.getSpriteAmount(currentAction)) {
+            if (animationIndex >= PlayerProperties.getSpriteAmount(currentAction)) {
                 animationIndex = 0
             }
         }
@@ -73,9 +74,9 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
 
     private fun updateAnimation() {
         currentAction = if (isMoving) {
-            Properties.Player.Animations.RUNNING
+            PlayerProperties.Animations.RUNNING
         } else {
-            Properties.Player.Animations.IDLE
+            PlayerProperties.Animations.IDLE
         }
     }
 
@@ -83,10 +84,10 @@ class Player(initialX: Int = 100, initialY: Int = 100) {
         if (!isMoving) return
 
         when (direction) {
-            Properties.Directions.LEFT -> xPosition -= movementSpeed
-            Properties.Directions.RIGHT -> xPosition += movementSpeed
-            Properties.Directions.UP -> yPosition -= movementSpeed
-            Properties.Directions.DOWN -> yPosition += movementSpeed
+            Direction.LEFT -> xPosition -= movementSpeed
+            Direction.RIGHT -> xPosition += movementSpeed
+            Direction.UP -> yPosition -= movementSpeed
+            Direction.DOWN -> yPosition += movementSpeed
             null -> {}
         }
     }

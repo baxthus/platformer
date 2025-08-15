@@ -18,6 +18,5 @@ class MouseInputs(private val gamePanel: GamePanel) : MouseListener, MouseMotion
 
     override fun mouseDragged(e: MouseEvent?) {}
 
-    override fun mouseMoved(e: MouseEvent?) {
-    }
+    override fun mouseMoved(e: MouseEvent?) {}
 }
